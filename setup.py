@@ -10,17 +10,17 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 # Fields marked as "Optional" may be commented out.
 
 setup(
-    name='Airobot_Selenium',  # Required
+    name='AirobotLibrary',  # Required
 
     version='1.0.0',  # Required
 
-    description='Selenium Library For Airobot Test Framework',  # Optional
+    description='Robotframework Library For Airobot Test Framework',  # Optional
 
     long_description=long_description,  # Optional
 
     long_description_content_type='text/markdown',  # Optional (see note above)
 
-    url='https://github.com/BSTester/Airobot_Selenium',  # Optional
+    url='https://github.com/BSTester/AirobotLibrary',  # Optional
 
     author='贝克街的捉虫师',  # Optional
 
@@ -134,6 +134,6 @@ setup(
         # 'Bug Reports': 'https://github.com/pypa/sampleproject/issues',
         # 'Funding': 'https://donate.pypi.org',
         # 'Say Thanks!': 'http://saythanks.io/to/example',
-        'Source': 'https://github.com/BSTester/Airobot_Selenium',
+        'Source': 'https://github.com/BSTester/AirobotLibrary',
     },
 )
