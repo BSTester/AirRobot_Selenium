@@ -1,3 +1,3 @@
-# Airobot_Selenium
+# AirobotLibrary
 
-Airtest Project的Airtest-Selenium插件功能扩展，整合了RobotFramework框架SeleniumLibrary的方法。
+Airtest Project的Airtest-Selenium插件功能扩展，整合了RobotFramework框架SeleniumLibrary的方法以及部分扩展库。
