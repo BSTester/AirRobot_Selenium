@@ -11,3 +11,5 @@ Airtest Project的Airtest-Selenium插件功能扩展，整合了RobotFramework�
     robotframework-ftplibrary 
     robotframework-archivelibrary 
     robotframework-difflibrary 
+
+请自行在 `https://npm.taobao.org/mirrors/chromedriver` 下载跟Chrome浏览器版本对应的驱动，放在系统PATH中。
