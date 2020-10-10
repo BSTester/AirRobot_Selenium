@@ -1,0 +1,3 @@
+# Airobot_Selenium
+
+Airtest Project的Airtest-Selenium插件功能扩展，整合了RobotFramework框架SeleniumLibrary的方法。
