@@ -179,7 +179,7 @@ class AirSelenium(
             self.screenshot(filename)
         jpg_file_name=str(int(time.time())) + '.jpg'
         jpg_path=os.path.join('', jpg_file_name)
-        print("this is jpg path:", jpg_path)
+        # print("this is jpg path:", jpg_path)
         self.screenshot(jpg_path)
         saved={"screen": jpg_file_name}
         if element:
