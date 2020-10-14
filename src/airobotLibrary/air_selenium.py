@@ -4,6 +4,7 @@ import time
 import inspect
 import traceback
 import functools
+import allure
 from selenium import webdriver
 from robotlibcore import PY2
 from robot.libraries.BuiltIn import RobotNotRunningError
@@ -92,30 +93,37 @@ class AirSelenium(
         return Element(web_element, log_res)
 
     @logwrap
+    @allure.step
     def click_element(self, locator, modifier=False, action_chain=False):
         super(AirSelenium, self).click_element(locator=locator, modifier=modifier, action_chain=action_chain)
 
     @logwrap
+    @allure.step
     def click_link(self, locator, modifier=False):
         super(AirSelenium, self).click_link(locator=locator, modifier=modifier)
 
     @logwrap
+    @allure.step
     def click_image(self, locator, modifier=False):
         super(AirSelenium, self).click_image(locator=locator, modifier=modifier)
 
     @logwrap
+    @allure.step
     def click_button(self, locator, modifier=False):
         super(AirSelenium, self).click_button(locator=locator, modifier=modifier)
 
     @logwrap
+    @allure.step
     def input_text(self, locator, text, clear=True):
         super(AirSelenium, self).input_text(locator=locator, text=text, clear=clear)
 
     @logwrap
+    @allure.step
     def input_password(self, locator, password, clear=True):
         super(AirSelenium, self).input_password(locator=locator, password=password, clear=clear)
 
     @logwrap
+    @allure.step
     def double_click_element(self, locator):
         super(AirSelenium, self).double_click_element(locator=locator)
 
@@ -128,50 +136,63 @@ class AirSelenium(
         super(AirSelenium, self).page_should_not_contain(text=text, loglevel=loglevel)
 
     @logwrap
+    @allure.step
     def open_context_menu(self, locator):
         super(AirSelenium, self).open_context_menu(locator=locator)
 
     @logwrap
+    @allure.step
     def mouse_up(self, locator):
         super(AirSelenium, self).mouse_up(locator=locator)
     
     @logwrap
+    @allure.step
     def mouse_down(self, locator):
         super(AirSelenium, self).mouse_down(locator=locator)
 
     @logwrap
+    @allure.step
     def mouse_over(self, locator):
         super(AirSelenium, self).mouse_over(locator=locator)
 
     @logwrap
+    @allure.step
     def mouse_out(self, locator):
         super(AirSelenium, self).mouse_out(locator=locator)
 
     @logwrap
+    @allure.step
     def drag_and_drop(self, locator, target):
         super(AirSelenium, self).drag_and_drop(locator=locator, target=target)
 
     @logwrap
+    @allure.step
     def drag_and_drop_by_offset(self, locator, xoffset, yoffset):
         super(AirSelenium, self).drag_and_drop_by_offset(locator=locator, xoffset=xoffset, yoffset=yoffset)
 
     @logwrap
+    @allure.step
     def go_to(self, url):
         super(AirSelenium, self).go_to(url=url)
 
     def screenshot(self, file_path=None):
         if file_path:
-            self.capture_page_screenshot(file_path)
+            file = self.capture_page_screenshot(file_path)
+            with open(file, 'rb') as fp:
+                file = fp.read()
+                allure.attach(file, '截图{}'.format(file_path), allure.attachment_type.JPG)
         else:
             if not self.screenshot_directory:
                 file_path = "temp.jpg"
             else:
                 file_path = os.path.join('', "temp.jpg")
-            self.capture_page_screenshot(file_path)
+            file = self.capture_page_screenshot(file_path)
+            with open(file, 'rb') as fp:
+                file = fp.read()
+                allure.attach(file, '截图{}'.format(file_path), allure.attachment_type.JPG)
             screen = aircv.imread(file_path)
             return screen
 
-    @logwrap
     def _gen_screen_log(self, element=None, filename=None,):
         if self.screenshot_directory is None:
             return None
@@ -203,6 +224,7 @@ class AirSelenium(
         except RobotNotRunningError:
             return os.getcwd() if PY2 else os.getcwd()
 
+    @allure.step
     def open_browser(self, url, browser='Chrome', alias=None, remote_url=None,
             desired_capabilities=None, ff_profile_dir=None, device=None, maximize_browser=True):
         """
