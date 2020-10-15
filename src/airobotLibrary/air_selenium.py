@@ -6,7 +6,7 @@ import traceback
 import functools
 import allure
 from selenium import webdriver
-from robotlibcore import PY2
+from SeleniumLibrary.base.robotlibcore import PY2
 from robot.libraries.BuiltIn import RobotNotRunningError
 from SeleniumLibrary import SeleniumLibrary
 from SeleniumLibrary.keywords import (AlertKeywords,
@@ -179,8 +179,7 @@ class AirSelenium(
         if file_path:
             file = self.capture_page_screenshot(file_path)
             with open(file, 'rb') as fp:
-                file = fp.read()
-                allure.attach(file, '截图{}'.format(file_path), allure.attachment_type.JPG)
+                allure.attach(fp.read(), '截图{}'.format(file_path), allure.attachment_type.JPG)
         else:
             if not self.screenshot_directory:
                 file_path = "temp.jpg"
@@ -188,8 +187,7 @@ class AirSelenium(
                 file_path = os.path.join('', "temp.jpg")
             file = self.capture_page_screenshot(file_path)
             with open(file, 'rb') as fp:
-                file = fp.read()
-                allure.attach(file, '截图{}'.format(file_path), allure.attachment_type.JPG)
+                allure.attach(fp.read(), '截图{}'.format(file_path), allure.attachment_type.JPG)
             screen = aircv.imread(file_path)
             return screen
 

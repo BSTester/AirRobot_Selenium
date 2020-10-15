@@ -12,7 +12,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 setup(
     name='AirobotLibrary',  # Required
 
-    version='1.0.1',  # Required
+    version='1.0.2',  # Required
 
     description='Robotframework Library For Airobot Test Framework',  # Optional
 
@@ -80,7 +80,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['robotframework-seleniumlibrary', 'robotframework-appiumlibrary', 'robotframework-databaselibrary', 'robotframework-difflibrary', 'robotframework-requests', 'robotframework-ftplibrary', 'robotframework-archivelibrary', 'airtest_selenium'],  # Optional
+    install_requires=['robotframework-seleniumlibrary', 'robotframework-appiumlibrary', 'robotframework-databaselibrary', 'robotframework-difflibrary', 'robotframework-requests', 'robotframework-ftplibrary', 'robotframework-archivelibrary', 'robotframework', 'robotframework-mongodbLibrary'],  # Optional
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
