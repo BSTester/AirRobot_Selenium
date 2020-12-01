@@ -6,7 +6,7 @@ import traceback
 import functools
 import allure
 from selenium import webdriver
-from SeleniumLibrary.base.robotlibcore import PY2
+from robotlibcore import PY2
 from robot.libraries.BuiltIn import RobotNotRunningError
 from SeleniumLibrary import SeleniumLibrary
 from SeleniumLibrary.keywords import (AlertKeywords,
@@ -25,7 +25,6 @@ from SeleniumLibrary.keywords import (AlertKeywords,
 from airtest import aircv
 from airtest_selenium.proxy import Element
 from airtest.core.helper import G
-from airtest_selenium.proxy import WebChrome
 
 
 def Logwrap(f, logger):
@@ -70,9 +69,14 @@ class AirSelenium(
     WaitingKeywords,
     WindowKeywords):
     
-    def __init__(self, screenshot_root_directory=os.path.join('Results', 'log'), web_driver=WebChrome, alias=None, device=None, headless=None, executable_path="chromedriver"):
+    def __init__(self, screenshot_root_directory=os.path.join('Results', 'log'), remote_url=None, browser='Chrome', headless=False, alias=None, device=None, executable_path=None, options=None, service_args=None, desired_capabilities=None):
+        """
+        启动浏览器类型可选: Firefox, Chrome, Ie, Opera, Safari, PhantomJS or Remote, 可模拟移动设备
+        """
+        if browser not in ['Firefox', 'Chrome', 'Remote', 'Ie', 'Opera', 'Safari', 'PhantomJS']:
+            raise Exception('浏览器类型不对, 仅可选: Firefox, Chrome, Ie, Opera, Safari, PhantomJS or Remote')
         ctx = SeleniumLibrary(screenshot_root_directory=screenshot_root_directory)
-        if web_driver and inspect.isclass(web_driver) and web_driver.__name__ == 'WebChrome': 
+        if browser and remote_url:
             chrome_options = webdriver.ChromeOptions()
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-setuid-sandbox')
@@ -82,7 +86,33 @@ class AirSelenium(
             if device:
                 mobile_emulation = {'deviceName': device}
                 chrome_options.add_experimental_option('mobileEmulation', mobile_emulation)
-            ctx.register_driver(web_driver(executable_path=executable_path, chrome_options=chrome_options), alias)
+            if remote_url:
+                ctx.create_webdriver(driver_name=browser, alias=alias, command_executor=remote_url, options=options or chrome_options, desired_capabilities=desired_capabilities)
+            else:
+                ctx.create_webdriver(driver_name=browser, alias=alias, options=options or chrome_options, desired_capabilities=desired_capabilities)
+        elif browser == 'Chrome': 
+            chrome_options = webdriver.ChromeOptions()
+            chrome_options.add_argument('--no-sandbox')
+            chrome_options.add_argument('--disable-setuid-sandbox')
+            if headless:
+                chrome_options.add_argument('--headless')
+                chrome_options.add_argument('--disable-gpu')
+            if device:
+                mobile_emulation = {'deviceName': device}
+                chrome_options.add_experimental_option('mobileEmulation', mobile_emulation)
+            if executable_path:
+                ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, options=options or chrome_options, service_args=service_args, desired_capabilities=desired_capabilities)
+            else:
+                ctx.create_webdriver(driver_name=browser, alias=alias, options=options or chrome_options, service_args=service_args, desired_capabilities=desired_capabilities)
+        elif browser == 'Firefox':
+            firefox_options = webdriver.FirefoxOptions()
+            if headless:
+                firefox_options.add_argument('--headless')
+                firefox_options.add_argument('--disable-gpu')
+            if executable_path:
+                ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
+            else:
+                ctx.create_webdriver(driver_name=browser, alias=alias, options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
         self.screenshot_directory = ctx.screenshot_root_directory
         super(AirSelenium, self).__init__(ctx)
     
@@ -179,15 +209,15 @@ class AirSelenium(
         if file_path:
             file = self.capture_page_screenshot(file_path)
             with open(file, 'rb') as fp:
-                allure.attach(fp.read(), '截图{}'.format(file_path), allure.attachment_type.JPG)
+                allure.attach(fp.read(), '截图{}'.format(file_path), allure.attachment_type.PNG)
         else:
             if not self.screenshot_directory:
-                file_path = "temp.jpg"
+                file_path = "temp.png"
             else:
-                file_path = os.path.join('', "temp.jpg")
+                file_path = os.path.join('', "temp.png")
             file = self.capture_page_screenshot(file_path)
             with open(file, 'rb') as fp:
-                allure.attach(fp.read(), '截图{}'.format(file_path), allure.attachment_type.JPG)
+                allure.attach(fp.read(), '截图{}'.format(file_path), allure.attachment_type.PNG)
             screen = aircv.imread(file_path)
             return screen
 
@@ -196,7 +226,7 @@ class AirSelenium(
             return None
         if filename:
             self.screenshot(filename)
-        jpg_file_name=str(int(time.time())) + '.jpg'
+        jpg_file_name=str(int(time.time())) + '.png'
         jpg_path=os.path.join('', jpg_file_name)
         # print("this is jpg path:", jpg_path)
         self.screenshot(jpg_path)
@@ -221,38 +251,3 @@ class AirSelenium(
                 return os.path.abspath(self.screenshot_directory)
         except RobotNotRunningError:
             return os.getcwd() if PY2 else os.getcwd()
-
-    @allure.step
-    def open_browser(self, url, browser='Chrome', alias=None, remote_url=None,
-            desired_capabilities=None, ff_profile_dir=None, device=None, maximize_browser=True):
-        """
-        启动浏览器类型，可选：Firefox、Chrome、Headless, 可模拟移动设备
-        """
-        if browser not in ['Firefox', 'Chrome', 'Headless']:
-            raise Exception('浏览器类型不对, 仅可选: Firefox, Chrome, Headless')
-        chrome_options = webdriver.ChromeOptions()
-        if browser == 'Headless':
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--no-sandbox')
-            chrome_options.add_argument('--disable-setuid-sandbox')
-            chrome_options.add_argument('--disable-gpu')
-            chrome_options = chrome_options.to_capabilities()
-        elif device and browser == 'Chrome':
-            chrome_options.add_argument('--no-sandbox')
-            chrome_options.add_argument('--disable-setuid-sandbox')
-            mobile_emulation = {'deviceName': device}
-            chrome_options.add_experimental_option('mobileEmulation', mobile_emulation)
-            chrome_options = chrome_options.to_capabilities()
-        elif browser == 'Chrome':
-            chrome_options.add_argument('--no-sandbox')
-            chrome_options.add_argument('--disable-setuid-sandbox')
-            chrome_options = chrome_options.to_capabilities()
-        else:
-            chrome_options = None
-        if remote_url:
-            browser = self.create_webdriver(driver_name=browser, alias=alias, command_executor=remote_url, desired_capabilities=desired_capabilities or chrome_options)
-        else:
-            browser = self.create_webdriver(driver_name=browser, alias=alias, desired_capabilities=desired_capabilities or chrome_options)
-        self.go_to(url=url)
-        maximize_browser and self.maximize_browser_window()
-        return browser
