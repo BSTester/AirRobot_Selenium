@@ -71,25 +71,32 @@ class AirSelenium(
     
     def __init__(self, screenshot_root_directory=os.path.join('Results', 'log'), remote_url=None, browser='Chrome', headless=False, alias=None, device=None, executable_path=None, options=None, service_args=None, desired_capabilities=None):
         """
-        启动浏览器类型可选: Firefox, Chrome, Ie, Opera, Safari, PhantomJS or Remote, 可模拟移动设备
+        启动浏览器类型可选: Firefox, Chrome, Ie, Opera, Safari, PhantomJS, 可模拟移动设备
         """
-        if browser not in ['Firefox', 'Chrome', 'Remote', 'Ie', 'Opera', 'Safari', 'PhantomJS']:
-            raise Exception('浏览器类型不对, 仅可选: Firefox, Chrome, Ie, Opera, Safari, PhantomJS or Remote')
+        if browser not in ['Firefox', 'Chrome', 'Ie', 'Opera', 'Safari', 'PhantomJS']:
+            raise Exception('浏览器类型不对, 仅可选: Firefox, Chrome, Ie, Opera, Safari, PhantomJS')
         ctx = SeleniumLibrary(screenshot_root_directory=screenshot_root_directory)
-        if browser and remote_url:
-            chrome_options = webdriver.ChromeOptions()
-            chrome_options.add_argument('--no-sandbox')
-            chrome_options.add_argument('--disable-setuid-sandbox')
-            if headless:
-                chrome_options.add_argument('--headless')
-                chrome_options.add_argument('--disable-gpu')
-            if device:
-                mobile_emulation = {'deviceName': device}
-                chrome_options.add_experimental_option('mobileEmulation', mobile_emulation)
-            if remote_url:
-                ctx.create_webdriver(driver_name=browser, alias=alias, command_executor=remote_url, options=options or chrome_options, desired_capabilities=desired_capabilities)
-            else:
-                ctx.create_webdriver(driver_name=browser, alias=alias, options=options or chrome_options, desired_capabilities=desired_capabilities)
+        if remote_url:
+            if browser == 'Chrome':
+                chrome_options = webdriver.ChromeOptions()
+                chrome_options.add_argument('--no-sandbox')
+                chrome_options.add_argument('--disable-setuid-sandbox')
+                if headless:
+                    chrome_options.add_argument('--headless')
+                    chrome_options.add_argument('--disable-gpu')
+                if device:
+                    mobile_emulation = {'deviceName': device}
+                    chrome_options.add_experimental_option('mobileEmulation', mobile_emulation)
+                options = chrome_options
+            elif browser == 'Firefox':
+                firefox_options = webdriver.FirefoxOptions()
+                if headless:
+                    firefox_options.add_argument('--headless')
+                    firefox_options.add_argument('--disable-gpu')
+                options = firefox_options
+            desired_capabilities = desired_capabilities or {}
+            desired_capabilities['browserName'] = browser.lower()
+            ctx.create_webdriver(driver_name='Remote', alias=alias, command_executor=remote_url, options=options, desired_capabilities=desired_capabilities)
         elif browser == 'Chrome': 
             chrome_options = webdriver.ChromeOptions()
             chrome_options.add_argument('--no-sandbox')
@@ -113,6 +120,11 @@ class AirSelenium(
                 ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
             else:
                 ctx.create_webdriver(driver_name=browser, alias=alias, options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
+        else:
+            if executable_path:
+                ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, options=options, service_args=service_args, desired_capabilities=desired_capabilities)
+            else:
+                ctx.create_webdriver(driver_name=browser, alias=alias, options=options, service_args=service_args, desired_capabilities=desired_capabilities)
         self.screenshot_directory = ctx.screenshot_root_directory
         super(AirSelenium, self).__init__(ctx)
     
