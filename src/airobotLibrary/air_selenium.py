@@ -1,9 +1,6 @@
 import os
 import sys
 import time
-import inspect
-import traceback
-import functools
 import allure
 from selenium import webdriver
 from robotlibcore import PY2
@@ -23,37 +20,9 @@ from SeleniumLibrary.keywords import (AlertKeywords,
                                       WaitingKeywords,
                                       WindowKeywords)
 from airtest import aircv
-from airtest_selenium.proxy import Element
-from airtest.core.helper import G
+from airtest_selenium.proxy import Element, WebChrome, WebFirefox, WebRemote
+from airtest.core.helper import logwrap
 from airtest.core.settings import Settings as ST
-
-
-def Logwrap(f, logger):
-    @functools.wraps(f)
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        m = inspect.getcallargs(f, *args, **kwargs)
-        m['self'] = str(m.get('self'))
-        fndata = {'name': f.__name__, 'call_args': m, 'start_time': start}
-        logger.running_stack.append(fndata)
-        try:
-            res = f(*args, **kwargs)
-        except Exception as e:
-            data = {"traceback": traceback.format_exc(), "end_time": time.time()}
-            fndata.update(data)
-            raise
-        else:
-            fndata.update({'ret': res, "end_time": time.time()})
-        finally:
-            logger.log('function', fndata)
-            logger.running_stack.pop()
-        return res
-    return wrapper
-
-
-def logwrap(f):
-    return Logwrap(f, G.LOGGER)
-
 
 class AirSelenium(
     AlertKeywords,
@@ -97,7 +66,8 @@ class AirSelenium(
                 options = firefox_options
             desired_capabilities = desired_capabilities or {}
             desired_capabilities['browserName'] = browser.lower()
-            ctx.create_webdriver(driver_name='Remote', alias=alias, command_executor=remote_url, options=options, desired_capabilities=desired_capabilities)
+            driver = WebRemote(command_executor=remote_url, desired_capabilities=desired_capabilities, options=options)
+            # ctx.create_webdriver(driver_name='Remote', alias=alias, command_executor=remote_url, options=options, desired_capabilities=desired_capabilities)
         elif browser == 'Chrome': 
             chrome_options = webdriver.ChromeOptions()
             chrome_options.add_argument('--no-sandbox')
@@ -109,23 +79,29 @@ class AirSelenium(
                 mobile_emulation = {'deviceName': device}
                 chrome_options.add_experimental_option('mobileEmulation', mobile_emulation)
             if executable_path:
-                ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, options=options or chrome_options, service_args=service_args, desired_capabilities=desired_capabilities)
+                driver = WebChrome(executable_path=executable_path, options=options or chrome_options, service_args=service_args, desired_capabilities=desired_capabilities)
+                # ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, options=options or chrome_options, service_args=service_args, desired_capabilities=desired_capabilities)
             else:
-                ctx.create_webdriver(driver_name=browser, alias=alias, options=options or chrome_options, service_args=service_args, desired_capabilities=desired_capabilities)
+                driver = WebChrome(options=options or chrome_options, service_args=service_args, desired_capabilities=desired_capabilities)
+                # ctx.create_webdriver(driver_name=browser, alias=alias, options=options or chrome_options, service_args=service_args, desired_capabilities=desired_capabilities)
         elif browser == 'Firefox':
             firefox_options = webdriver.FirefoxOptions()
             if headless:
                 firefox_options.add_argument('--headless')
                 firefox_options.add_argument('--disable-gpu')
             if executable_path:
-                ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
+                driver = WebFirefox(executable_path=executable_path, options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
+                # ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
             else:
-                ctx.create_webdriver(driver_name=browser, alias=alias, options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
+                driver = WebFirefox(options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
+                # ctx.create_webdriver(driver_name=browser, alias=alias, options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
         else:
             if executable_path:
                 ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, options=options, service_args=service_args, desired_capabilities=desired_capabilities)
             else:
                 ctx.create_webdriver(driver_name=browser, alias=alias, options=options, service_args=service_args, desired_capabilities=desired_capabilities)
+            driver = ctx.driver
+        ctx.register_driver(driver=driver, alias=alias)
         self.screenshot_directory = ctx.screenshot_root_directory
         super(AirSelenium, self).__init__(ctx)
     
