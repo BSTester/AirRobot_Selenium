@@ -39,7 +39,7 @@ class AirSelenium(
     WaitingKeywords,
     WindowKeywords):
     
-    def __init__(self, screenshot_root_directory=os.path.join('Results', 'log'), remote_url=ST.REMOTE_URL, browser=ST.BROWSER, headless=False, alias=None, device=None, executable_path=None, options=None, service_args=None, desired_capabilities=None):
+    def __init__(self, screenshot_root_directory='logs', remote_url=ST.REMOTE_URL, browser=ST.BROWSER, headless=False, alias=None, device=None, executable_path=None, options=None, service_args=None, desired_capabilities=None):
         """
         启动浏览器类型可选: Firefox, Chrome, Ie, Opera, Safari, PhantomJS, 可模拟移动设备
         """
