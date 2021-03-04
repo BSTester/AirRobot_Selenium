@@ -97,9 +97,9 @@ class AirSelenium(
                 # ctx.create_webdriver(driver_name=browser, alias=alias, options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
         else:
             if executable_path:
-                ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, options=options, service_args=service_args, desired_capabilities=desired_capabilities)
+                ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, service_args=service_args, desired_capabilities=desired_capabilities)
             else:
-                ctx.create_webdriver(driver_name=browser, alias=alias, options=options, service_args=service_args, desired_capabilities=desired_capabilities)
+                ctx.create_webdriver(driver_name=browser, alias=alias, service_args=service_args, desired_capabilities=desired_capabilities)
             driver = ctx.driver
         ctx.register_driver(driver=driver, alias=alias)
         self.screenshot_directory = ctx.screenshot_root_directory

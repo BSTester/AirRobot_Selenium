@@ -1,3 +1,5 @@
+# coding=utf8
+
 from setuptools import setup, find_packages
 import pathlib
 
@@ -12,7 +14,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 setup(
     name='AirobotLibrary',  # Required
 
-    version='1.0.6',  # Required
+    version='1.0.7',  # Required
 
     description='Robotframework Library For Airobot Test Framework',  # Optional
 
