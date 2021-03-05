@@ -24,6 +24,9 @@ from airtest_selenium.proxy import Element, WebChrome, WebFirefox, WebRemote
 from airtest.core.helper import logwrap
 from airtest.core.settings import Settings as ST
 
+if not hasattr(ST, 'REMOTE_URL'): ST.REMOTE_URL = None
+if not hasattr(ST, 'BROWSER'): ST.BROWSER = 'Chrome'
+
 class AirSelenium(
     AlertKeywords,
     BrowserManagementKeywords,
