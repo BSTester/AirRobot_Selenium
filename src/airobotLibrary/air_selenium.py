@@ -54,22 +54,26 @@ class AirSelenium(
                 chrome_options = webdriver.ChromeOptions()
                 chrome_options.add_argument('--no-sandbox')
                 chrome_options.add_argument('--disable-setuid-sandbox')
+                chrome_options.add_argument('--disable-dev-shm-usage')        
                 if headless:
                     chrome_options.add_argument('--headless')
                     chrome_options.add_argument('--disable-gpu')
                 if device:
                     mobile_emulation = {'deviceName': device}
                     chrome_options.add_experimental_option('mobileEmulation', mobile_emulation)
-                options = chrome_options
+                browser_options = chrome_options
             elif browser == 'Firefox':
                 firefox_options = webdriver.FirefoxOptions()
+                firefox_options.add_argument('--disable-dev-shm-usage')        
                 if headless:
                     firefox_options.add_argument('--headless')
                     firefox_options.add_argument('--disable-gpu')
-                options = firefox_options
+                browser_options = firefox_options
+            else:
+                browser_options = options
             desired_capabilities = desired_capabilities or {}
             desired_capabilities['browserName'] = browser.lower()
-            driver = WebRemote(command_executor=remote_url, desired_capabilities=desired_capabilities, options=options)
+            driver = WebRemote(command_executor=remote_url, desired_capabilities=desired_capabilities, options=options or browser_options)
             # ctx.create_webdriver(driver_name='Remote', alias=alias, command_executor=remote_url, options=options, desired_capabilities=desired_capabilities)
         elif browser == 'Chrome': 
             chrome_options = webdriver.ChromeOptions()
