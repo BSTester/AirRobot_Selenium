@@ -111,7 +111,7 @@ class AirSelenium(
                 ctx.create_webdriver(driver_name=browser, alias=alias, service_args=service_args, desired_capabilities=desired_capabilities)
             driver = ctx.driver
         ctx.register_driver(driver=driver, alias=alias)
-        self.screenshot_directory = ctx.screenshot_root_directory
+        self.screenshot_directory = ST.LOG_DIR = ctx.screenshot_root_directory
         super(AirSelenium, self).__init__(ctx)
     
     @logwrap
@@ -122,12 +122,12 @@ class AirSelenium(
     
     @logwrap
     @allure.step
-    def airtest_touch(self, v):
+    def air_click(self, v):
         """
-        Perform the touch action on the current page by image identification.
+        Perform the click action on the current page by image identification.
 
         Args:
-            v: target to touch, either a Template instance or absolute coordinates (x, y)
+            v: target to click, either a Template instance or absolute coordinates (x, y)
         Returns:
             Finial position to be clicked.
         """
@@ -146,7 +146,7 @@ class AirSelenium(
 
     @logwrap
     @allure.step
-    def assert_template(self, v, msg=""):
+    def air_assert(self, v, msg=""):
         """
         Assert target exists on the current page.
 
@@ -160,6 +160,179 @@ class AirSelenium(
         if not isinstance(self.driver, (WebChrome, WebFirefox, WebRemote)):
             raise AssertionError('Use this function, the driver is must be WebChrome, WebFirefox or WebRemote')
         return self.driver.assert_template(v=v, msg=msg)
+
+    @logwrap
+    @allure.step
+    def air_double_click(self, v):
+        """
+        Perform the double click action on the current page by image identification.
+
+        Args:
+            v: target to double click, either a Template instance or absolute coordinates (x, y)
+        Returns:
+            Finial position to be double clicked.
+        """
+        if not isinstance(self.driver, (WebChrome, WebFirefox, WebRemote)):
+            raise AssertionError('Use this function, the driver is must be WebChrome, WebFirefox or WebRemote')
+        if isinstance(v, Template):
+            _pos = loop_find(v, timeout=ST.FIND_TIMEOUT, driver=self.driver)
+        else:
+            _pos = v
+        x, y = _pos
+        # pos = self.driver._get_left_up_offset()
+        # pos = (pos[0] + x, pos[1] + y)
+        self.driver.action_chains.move_by_offset(x, y).double_click().perform()
+        time.sleep(1)
+        return _pos
+
+    @logwrap
+    @allure.step
+    def air_context_click(self, v):
+        """
+        Perform the right click action on the current page by image identification.
+
+        Args:
+            v: target to right click, either a Template instance or absolute coordinates (x, y)
+        Returns:
+            Finial position to be right clicked.
+        """
+        if not isinstance(self.driver, (WebChrome, WebFirefox, WebRemote)):
+            raise AssertionError('Use this function, the driver is must be WebChrome, WebFirefox or WebRemote')
+        if isinstance(v, Template):
+            _pos = loop_find(v, timeout=ST.FIND_TIMEOUT, driver=self.driver)
+        else:
+            _pos = v
+        x, y = _pos
+        # pos = self.driver._get_left_up_offset()
+        # pos = (pos[0] + x, pos[1] + y)
+        self.driver.action_chains.move_by_offset(x, y).context_click().perform()
+        time.sleep(1)
+        return _pos
+
+    @logwrap
+    @allure.step
+    def air_mouse_up(self, v):
+        """
+        Perform the mouse up action on the current page by image identification.
+
+        Args:
+            v: target to mouse up, either a Template instance or absolute coordinates (x, y)
+        Returns:
+            Finial position to be mouse up.
+        """
+        if not isinstance(self.driver, (WebChrome, WebFirefox, WebRemote)):
+            raise AssertionError('Use this function, the driver is must be WebChrome, WebFirefox or WebRemote')
+        if isinstance(v, Template):
+            _pos = loop_find(v, timeout=ST.FIND_TIMEOUT, driver=self.driver)
+        else:
+            _pos = v
+        x, y = _pos
+        # pos = self.driver._get_left_up_offset()
+        # pos = (pos[0] + x, pos[1] + y)
+        self.driver.action_chains.move_by_offset(x, y).release().perform()
+        time.sleep(1)
+        return _pos
+    
+    @logwrap
+    @allure.step
+    def air_mouse_down(self, v):
+        """
+        Perform the mouse down action on the current page by image identification.
+
+        Args:
+            v: target to mouse down, either a Template instance or absolute coordinates (x, y)
+        Returns:
+            Finial position to be mouse down.
+        """
+        if not isinstance(self.driver, (WebChrome, WebFirefox, WebRemote)):
+            raise AssertionError('Use this function, the driver is must be WebChrome, WebFirefox or WebRemote')
+        if isinstance(v, Template):
+            _pos = loop_find(v, timeout=ST.FIND_TIMEOUT, driver=self.driver)
+        else:
+            _pos = v
+        x, y = _pos
+        # pos = self.driver._get_left_up_offset()
+        # pos = (pos[0] + x, pos[1] + y)
+        self.driver.action_chains.move_by_offset(x, y).click_and_hold().perform()
+        time.sleep(1)
+        return _pos
+
+    @logwrap
+    @allure.step
+    def air_mouse_over(self, v):
+        """
+        Perform the mouse over action on the current page by image identification.
+
+        Args:
+            v: target to mouse over, either a Template instance or absolute coordinates (x, y)
+        Returns:
+            Finial position to be mouse over.
+        """
+        if not isinstance(self.driver, (WebChrome, WebFirefox, WebRemote)):
+            raise AssertionError('Use this function, the driver is must be WebChrome, WebFirefox or WebRemote')
+        if isinstance(v, Template):
+            _pos = loop_find(v, timeout=ST.FIND_TIMEOUT, driver=self.driver)
+        else:
+            _pos = v
+        x, y = _pos
+        # pos = self.driver._get_left_up_offset()
+        # pos = (pos[0] + x, pos[1] + y)
+        self.driver.action_chains.move_by_offset(x, y).perform()
+        time.sleep(1)
+        return _pos
+
+    @logwrap
+    @allure.step
+    def air_mouse_out(self, v):
+        """
+        Perform the mouse out action on the current page by image identification.
+
+        Args:
+            v: target to mouse out, either a Template instance or absolute coordinates (x, y)
+        Returns:
+            Finial position to be mouse out.
+        """
+        if not isinstance(self.driver, (WebChrome, WebFirefox, WebRemote)):
+            raise AssertionError('Use this function, the driver is must be WebChrome, WebFirefox or WebRemote')
+        if isinstance(v, Template):
+            _pos = loop_find(v, timeout=ST.FIND_TIMEOUT, driver=self.driver)
+        else:
+            _pos = v
+        x, y = _pos
+        # pos = self.driver._get_left_up_offset()
+        # pos = (pos[0] + x, pos[1] + y)
+        self.driver.action_chains.move_by_offset(x, y).move_by_offset(0, 0).perform()
+        time.sleep(1)
+        return _pos
+
+    @logwrap
+    @allure.step
+    def air_drag_and_drop(self, s, t):
+        """
+        Perform the drag and drop action on the current page by image identification.
+
+        Args:
+            v: target to drag and drop, either a Template instance or absolute coordinates (x, y)
+        Returns:
+            Finial position to be drag and drop.
+        """
+        if not isinstance(self.driver, (WebChrome, WebFirefox, WebRemote)):
+            raise AssertionError('Use this function, the driver is must be WebChrome, WebFirefox or WebRemote')
+        if isinstance(s, Template):
+            _pos_s = loop_find(s, timeout=ST.FIND_TIMEOUT, driver=self.driver)
+        else:
+            _pos_s = s
+        x_s, y_s = _pos_s
+        if isinstance(t, Template):
+            _pos_t = loop_find(t, timeout=ST.FIND_TIMEOUT, driver=self.driver)
+        else:
+            _pos_t = t
+        x_t, y_t = _pos_t
+        # pos = self.driver._get_left_up_offset()
+        # pos = (pos[0] + x, pos[1] + y)
+        self.driver.action_chains.move_by_offset(x_s, y_s).click_and_hold().move_by_offset(x_t, y_t).release().perform()
+        time.sleep(1)
+        return _pos_s, _pos_t
 
     @logwrap
     @allure.step
