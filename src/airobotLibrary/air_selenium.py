@@ -23,6 +23,8 @@ from airtest import aircv
 from airtest_selenium.proxy import Element, WebChrome, WebFirefox, WebRemote
 from airtest.core.helper import logwrap
 from airtest.core.settings import Settings as ST
+from airtest.core.cv import Template
+from airtest_selenium.utils.airtest_api import loop_find
 
 if not hasattr(ST, 'REMOTE_URL'): ST.REMOTE_URL = None
 if not hasattr(ST, 'BROWSER'): ST.BROWSER = 'Chrome'
@@ -117,6 +119,47 @@ class AirSelenium(
         web_element = super(AirSelenium, self).find_element(locator=locator, tag=tag, required=required, parent=parent)
         log_res=self._gen_screen_log(web_element)
         return Element(web_element, log_res)
+    
+    @logwrap
+    @allure.step
+    def airtest_touch(self, v):
+        """
+        Perform the touch action on the current page by image identification.
+
+        Args:
+            v: target to touch, either a Template instance or absolute coordinates (x, y)
+        Returns:
+            Finial position to be clicked.
+        """
+        if not isinstance(self.driver, (WebChrome, WebFirefox, WebRemote)):
+            raise AssertionError('Use this function, the driver is must be WebChrome, WebFirefox or WebRemote')
+        if isinstance(v, Template):
+            _pos = loop_find(v, timeout=ST.FIND_TIMEOUT, driver=self.driver)
+        else:
+            _pos = v
+        x, y = _pos
+        # pos = self.driver._get_left_up_offset()
+        # pos = (pos[0] + x, pos[1] + y)
+        self.driver.action_chains.move_by_offset(x, y).click().perform()
+        time.sleep(1)
+        return _pos
+
+    @logwrap
+    @allure.step
+    def assert_template(self, v, msg=""):
+        """
+        Assert target exists on the current page.
+
+        Args:
+            v: target to touch, either a Template instance
+        Raise:
+            AssertionError - if target not found.
+        Returns:
+            Position of the template.
+        """
+        if not isinstance(self.driver, (WebChrome, WebFirefox, WebRemote)):
+            raise AssertionError('Use this function, the driver is must be WebChrome, WebFirefox or WebRemote')
+        return self.driver.assert_template(v=v, msg=msg)
 
     @logwrap
     @allure.step
