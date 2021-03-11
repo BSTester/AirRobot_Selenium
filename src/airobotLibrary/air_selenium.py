@@ -20,11 +20,12 @@ from SeleniumLibrary.keywords import (AlertKeywords,
                                       WaitingKeywords,
                                       WindowKeywords)
 from airtest import aircv
-from airtest_selenium.proxy import Element, WebChrome, WebFirefox, WebRemote
+from airtest_selenium.proxy import Element, WebChrome, WebFirefox, WebRemote, WebElement
 from airtest.core.helper import logwrap
 from airtest.core.settings import Settings as ST
 from airtest.core.cv import Template
 from airtest_selenium.utils.airtest_api import loop_find
+from typing import Optional, Union, Any
 
 if not hasattr(ST, 'REMOTE_URL'): ST.REMOTE_URL = None
 if not hasattr(ST, 'BROWSER'): ST.BROWSER = 'Chrome'
@@ -50,7 +51,50 @@ class AirSelenium(
         """
         if browser not in ['Firefox', 'Chrome', 'Ie', 'Opera', 'Safari', 'PhantomJS']:
             raise Exception('浏览器类型不对, 仅可选: Firefox, Chrome, Ie, Opera, Safari, PhantomJS')
-        ctx = SeleniumLibrary(screenshot_root_directory=screenshot_root_directory)
+        self.remote_url = remote_url
+        self.browser = browser
+        self.headless = headless
+        self.alias = alias 
+        self.device = device
+        self.executable_path = executable_path
+        self.options = options
+        self.service_args = service_args
+        self.desired_capabilities = desired_capabilities
+
+        self.ctx = SeleniumLibrary(screenshot_root_directory=screenshot_root_directory)
+        self.screenshot_directory = ST.LOG_DIR = self.ctx.screenshot_root_directory
+        super(AirSelenium, self).__init__(self.ctx)
+
+    @logwrap
+    @allure.step
+    def open_browser(
+        self,
+        url: Optional[str] = None,
+        browser: str = "Chrome",
+        alias: Optional[str] = None,
+        remote_url: Union[bool, str] = False,
+        headless: Optional[bool] = False,
+        options: Any = None,
+        device: Optional[str] = None,
+        executable_path: Optional[str] = None,
+        service_args: Union[dict, None, str] = None,
+        desired_capabilities: Union[dict, None, str] = None) -> str:
+        """
+        启动浏览器类型可选: Firefox, Chrome, Ie, Opera, Safari, PhantomJS, 可模拟移动设备
+        """
+        if browser not in ['Firefox', 'Chrome', 'Ie', 'Opera', 'Safari', 'PhantomJS']:
+            raise Exception('浏览器类型不对, 仅可选: Firefox, Chrome, Ie, Opera, Safari, PhantomJS')
+                
+        remote_url = remote_url or self.remote_url
+        browser = browser or self.browser
+        headless = headless or self.headless
+        alias  = alias or self.alias
+        device = device or self.device
+        executable_path = executable_path or self.executable_path
+        options or self.options
+        service_args = service_args or self.service_args
+        desired_capabilities = desired_capabilities or self.desired_capabilities
+
         if remote_url:
             if browser == 'Chrome':
                 chrome_options = webdriver.ChromeOptions()
@@ -106,14 +150,84 @@ class AirSelenium(
                 # ctx.create_webdriver(driver_name=browser, alias=alias, options=options or firefox_options, service_args=service_args, desired_capabilities=desired_capabilities)
         else:
             if executable_path:
-                ctx.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, service_args=service_args, desired_capabilities=desired_capabilities)
+                self.create_webdriver(driver_name=browser, alias=alias, executable_path=executable_path, service_args=service_args, desired_capabilities=desired_capabilities)
             else:
-                ctx.create_webdriver(driver_name=browser, alias=alias, service_args=service_args, desired_capabilities=desired_capabilities)
-            driver = ctx.driver
-        ctx.register_driver(driver=driver, alias=alias)
-        self.screenshot_directory = ST.LOG_DIR = ctx.screenshot_root_directory
-        super(AirSelenium, self).__init__(ctx)
+                self.create_webdriver(driver_name=browser, alias=alias, service_args=service_args, desired_capabilities=desired_capabilities)
+            driver = self.driver
+        index = self.ctx.register_driver(driver=driver, alias=alias)
+        if url: self.go_to(url)
+        return index
+
+    @logwrap
+    @allure.step
+    def close_browser(self):
+        return super(AirSelenium, self).close_browser()
+        
+    @logwrap
+    @allure.step
+    def close_all_browsers(self):
+        return super(AirSelenium, self).close_all_browsers()
+
+    @logwrap
+    @allure.step
+    def switch_browser(self, index_or_alias: str):
+        return super(AirSelenium, self).switch_browser(index_or_alias)
+        
+    @logwrap
+    @allure.step
+    def switch_window(self, locator: Union[list, str] = "MAIN", timeout: Optional[str] = None, browser: str = 'CURRENT'):
+        return super(AirSelenium, self).switch_window(locator=locator, timeout=timeout, browser=browser)
+        
+    @logwrap
+    @allure.step
+    def set_window_size(self, width: int, height: int, inner: bool = False):
+        return super(AirSelenium, self).set_window_size(width, height, inner=inner)
+
+    @logwrap
+    @allure.step
+    def choose_file(self, locator: Union[WebElement, str], file_path: str):
+        return super(AirSelenium, self).choose_file(locator, file_path)
+
+    @logwrap
+    @allure.step
+    def go_back(self):
+        return super(AirSelenium, self).go_back()
     
+    @logwrap
+    @allure.step
+    def press_key(self, locator: Union[WebElement, str], key: str):
+        return super(AirSelenium, self).press_key(locator, key)
+        
+    @logwrap
+    @allure.step
+    def press_keys(self, locator: Union[WebElement, None, str] = None, *keys: str):
+        return super(AirSelenium, self).press_keys(locator=locator, *keys)
+
+    @logwrap
+    @allure.step
+    def select_checkbox(self, locator: Union[WebElement, str]):
+        return super(AirSelenium, self).select_checkbox(locator)
+
+    @logwrap
+    @allure.step
+    def select_radio_button(self, group_name: str, value: str):
+        return super(AirSelenium, self).select_radio_button(group_name, value)
+        
+    @logwrap
+    @allure.step
+    def scroll_element_into_view(self, locator: Union[WebElement, str]):
+        return super(AirSelenium, self).scroll_element_into_view(locator)
+        
+    @logwrap
+    @allure.step
+    def unselect_checkbox(self, locator: Union[WebElement, str]):
+        return super(AirSelenium, self).unselect_checkbox(locator)
+        
+    @logwrap
+    @allure.step
+    def unselect_all_from_list(self, locator: Union[WebElement, str]):
+        return super(AirSelenium, self).unselect_all_from_list(locator)
+
     @logwrap
     def find_element(self, locator, tag=None, required=True, parent=None):
         web_element = super(AirSelenium, self).find_element(locator=locator, tag=tag, required=required, parent=parent)
@@ -370,10 +484,12 @@ class AirSelenium(
         super(AirSelenium, self).double_click_element(locator=locator)
 
     @logwrap
+    @allure.step
     def page_should_contain(self, text, loglevel='TRACE'):
         super(AirSelenium, self).page_should_contain(text=text, loglevel=loglevel)
 
     @logwrap
+    @allure.step
     def page_should_not_contain(self, text, loglevel='TRACE'):
         super(AirSelenium, self).page_should_not_contain(text=text, loglevel=loglevel)
 
