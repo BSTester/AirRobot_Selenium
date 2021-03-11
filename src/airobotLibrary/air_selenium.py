@@ -232,7 +232,7 @@ class AirSelenium(
     def find_element(self, locator, tag=None, required=True, parent=None):
         web_element = super(AirSelenium, self).find_element(locator=locator, tag=tag, required=required, parent=parent)
         log_res=self._gen_screen_log(web_element)
-        return Element(web_element, log_res)
+        return web_element and Element(web_element, log_res)
     
     @logwrap
     @allure.step
