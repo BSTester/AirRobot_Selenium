@@ -31,8 +31,6 @@ class AirAppium(AppiumLibrary):
         self.driver.stop_app = self.stop_app
         self.driver.start_app = self.start_app
         self.driver.shell = self.shell
-        self.driver.swipe = self.air_swipe
-        self.driver.pinch = self.air_pinch
         G.add_device(self.driver)
         return app
 
@@ -313,7 +311,7 @@ class AirAppium(AppiumLibrary):
 
     def touch(self, pos, duration=0.01, **kwargs):
         if not isinstance(pos, (list, tuple)):
-            raise Exception('params pos is must be tuple or list')
+            raise Exception('params pos is must be tuple or list, but pos is {}'.format(type(pos)))
         if self._is_ios() or self._is_android():
             self.click_a_point(x=pos[0], y=pos[1], duration=duration*1000)
         else:
@@ -354,14 +352,3 @@ class AirAppium(AppiumLibrary):
             self.execute_adb_shell(cmd)
         else:
             raise Exception('Unsupport this keyword')
-
-    def air_swipe(self, v1, v2, duration=0, *args):
-        if not isinstance(v1, (list, tuple)) or not isinstance(v2, (list, tuple)):
-            raise Exception('params v1 and v2 is must be tuple or list')
-        if self._is_ios() or self._is_android():
-            self.swipe(start_x=v1[0], start_y=v1[1], offset_x=v2[0], offset_y=v2[1], duration=duration*1000)
-        else:
-            raise Exception('Unsupport this keyword')
-
-    def air_pinch(self, in_or_out='in', center=None, percent=0.5):
-        raise Exception('Unsupport this keyword')
