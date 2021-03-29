@@ -1,7 +1,11 @@
 from AppiumLibrary import AppiumLibrary
 from airtest.core.settings import Settings as ST
+from airtest import aircv
 from airobots.core.api import G
 import allure
+import traceback
+import base64
+import time
 
 
 if not hasattr(ST, 'REMOTE_URL'): ST.REMOTE_URL = None
@@ -13,7 +17,23 @@ class AirAppium(AppiumLibrary):
     @allure.step
     def open_application(self, remote_url=ST.REMOTE_URL, alias=None, **kwargs):
         app = super(AirAppium, self).open_application(remote_url=remote_url, alias=alias, **kwargs)
-        G.add_device(self._current_application())
+        self.driver = self._current_application()
+        self.driver.home = self.home
+        self.driver.snapshot = self.snapshot
+        self.driver.text = self.text
+        self.driver.keyevent = self.keyevent
+        self.driver.double_click = self.double_click
+        self.driver.click = self.touch
+        self.driver.touch = self.touch
+        self.driver.wake = self.wake
+        self.driver.uninstall_app = self.uninstall_app
+        self.driver.clear_app = self.clear_app
+        self.driver.stop_app = self.stop_app
+        self.driver.start_app = self.start_app
+        self.driver.shell = self.shell
+        self.driver.swipe = self.air_swipe
+        self.driver.pinch = self.air_pinch
+        G.add_device(self.driver)
         return app
 
     @allure.step
@@ -234,3 +254,114 @@ class AirAppium(AppiumLibrary):
             element.send_keys(text)
         except Exception as e:
             raise Exception('Cannot input text "%s" for the %s element "%s"' % (text, class_name, index_or_name))
+
+    def home(self):
+        if self._is_ios():
+            return self.driver.press_button("home")
+        elif self._is_android():
+            return self.driver.press_keycode(3)
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def snapshot(self, filename=None, strType=False, quality=10, max_size=None, **kwargs):
+        if self._is_ios() or self._is_android():
+            value = self.driver.get_screenshot_as_base64()
+            data = base64.b64decode(value)
+            if strType:
+                if filename:
+                    with open(filename, 'wb') as f:
+                        f.write(data)
+                return data
+            # output cv2 object
+            try:
+                screen = aircv.utils.string_2_img(data)
+            except:
+                # may be black/locked screen or other reason, print exc for debugging
+                traceback.print_exc()
+                return None
+
+            # save as file if needed
+            if filename:
+                aircv.imwrite(filename, screen, quality, max_size=max_size)
+            return screen
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def text(self, text, enter=True, **kwargs):
+        if self._is_ios() or self._is_android():
+            if enter:
+                text += '\n'
+            self.driver.send_keys(text)
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def keyevent(self, keyname, **kwargs):
+        if self._is_ios():
+            return self.driver.press_button(keyname)
+        elif self._is_android():
+            self.driver.keyevent(keyname)
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def double_click(self, pos):
+        if self._is_ios() or self._is_android():
+            self.touch(pos)
+            time.sleep(0.05)
+            self.touch(pos)
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def touch(self, pos, duration=0.01, **kwargs):
+        if not isinstance(pos, (list, tuple)):
+            raise Exception('params pos is must be tuple or list')
+        if self._is_ios() or self._is_android():
+            self.click_a_point(x=pos[0], y=pos[1], duration=duration*1000)
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def wake(self):
+        if self._is_ios() or self._is_android():
+            self.home()
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def uninstall_app(self, package):
+        if self._is_ios() or self._is_android():
+            self.driver.removeApp(package)
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def clear_app(self, package):
+        if self._is_ios() or self._is_android():
+            self.driver.reset()
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def stop_app(self, package):
+        if self._is_ios() or self._is_android():
+            self.driver.terminate_app(package)
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def start_app(self, package, activity=None):
+        if self._is_ios() or self._is_android():
+            self.driver.activate_app(package)
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def shell(self, cmd):
+        if self._is_android():
+            self.execute_adb_shell(cmd)
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def air_swipe(self, v1, v2, duration=0, *args):
+        if not isinstance(v1, (list, tuple)) or not isinstance(v2, (list, tuple)):
+            raise Exception('params v1 and v2 is must be tuple or list')
+        if self._is_ios() or self._is_android():
+            self.swipe(start_x=v1[0], start_y=v1[1], offset_x=v2[0], offset_y=v2[1], duration=duration*1000)
+        else:
+            raise Exception('Unsupport this keyword')
+
+    def air_pinch(self, in_or_out='in', center=None, percent=0.5):
+        raise Exception('Unsupport this keyword')
