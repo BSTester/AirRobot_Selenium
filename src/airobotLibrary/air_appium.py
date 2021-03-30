@@ -31,10 +31,10 @@ class AirAppium(AppiumLibrary):
         self.driver.stop_app = self.stop_app
         self.driver.start_app = self.start_app
         self.driver.shell = self.shell
-        self.driver.air_pinch = self.driver.pinch
         self.driver.air_swipe = self.driver.swipe
         self.driver.pinch = self.air_pinch
         self.driver.swipe = self.air_swipe
+        self.driver.get_current_resolution = self.get_current_resolution
         G.add_device(self.driver)
         return app
 
@@ -313,7 +313,7 @@ class AirAppium(AppiumLibrary):
         else:
             raise Exception('Unsupport this keyword')
 
-    def touch(self, pos, duration=0.01, **kwargs):
+    def touch(self, pos, duration=0, **kwargs):
         if not isinstance(pos, (list, tuple)):
             raise Exception('params pos is must be tuple or list, but pos is {}'.format(type(pos)))
         if self._is_ios() or self._is_android():
@@ -329,13 +329,14 @@ class AirAppium(AppiumLibrary):
 
     def uninstall_app(self, package):
         if self._is_ios() or self._is_android():
-            self.driver.removeApp(package)
+            self.driver.remove_app(package)
         else:
             raise Exception('Unsupport this keyword')
 
     def clear_app(self, package):
         if self._is_ios() or self._is_android():
-            self.driver.reset()
+            self.stop_app(package)
+            self.start_app(package)
         else:
             raise Exception('Unsupport this keyword')
 
@@ -358,12 +359,9 @@ class AirAppium(AppiumLibrary):
             raise Exception('Unsupport this keyword')
 
     def air_pinch(self, center=None, percent=0.5, duration=0.5, steps=1, in_or_out='in', element=None, **kwargs):
-        if element is not None:
-            self.driver.air_pinch(element=element, percent=percent, steps=steps, **kwargs)
-        else:
-            raise Exception('Unsupport this keyword')
+        raise Exception('Unsupport this keyword')
 
-    def air_swipe(self, start_x=None, start_y=None, offset_x=None, offset_y=None, duration=1000, **kwargs):
+    def air_swipe(self, start_x=None, start_y=None, offset_x=None, offset_y=None, duration=0.1, **kwargs):
         if self._is_ios() or self._is_android():
             if isinstance(start_x, (list, tuple)):
                 duration = float(duration) * 1000
@@ -371,6 +369,10 @@ class AirAppium(AppiumLibrary):
                 offset_y = start_y and start_y[1]
                 start_y = start_x[1]
                 start_x = start_x[0]
-            self.driver.air_swipe(start_x=start_x, start_y=start_y, offset_x=offset_x, offset_y=offset_y, duration=duration, **kwargs)
+            self.driver.air_swipe(start_x=start_x, start_y=start_y, end_x=offset_x, end_y=offset_y, duration=duration, **kwargs)
         else:
             raise Exception('Unsupport this keyword')
+
+    def get_current_resolution(self):
+        size = self.driver.get_window_size()
+        return size.get('width'), size.get('height')
