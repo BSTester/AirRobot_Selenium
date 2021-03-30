@@ -2,6 +2,8 @@ from AppiumLibrary import AppiumLibrary
 from airtest.core.settings import Settings as ST
 from airtest import aircv
 from airobots.core.api import G
+from appium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
 import allure
 import traceback
 import base64
@@ -16,12 +18,17 @@ class AirAppium(AppiumLibrary):
 
     @allure.step
     def open_application(self, remote_url=ST.REMOTE_URL, alias=None, **kwargs):
-        app = super(AirAppium, self).open_application(remote_url=remote_url, alias=alias, **kwargs)
-        self.driver = self._current_application()
+        desired_caps = kwargs
+        application = webdriver.Remote(str(remote_url), desired_caps)
+
+        self._debug('Opened application with session id %s' % application.session_id)
+
+        self.driver = application
         self.driver.home = self.home
         self.driver.snapshot = self.snapshot
         self.driver.text = self.text
-        self.driver.keyevent = self.keyevent
+        self.driver.air_keyevent = self.driver.keyevent
+        self.driver.keyevent = self.air_keyevent
         self.driver.double_click = self.double_click
         self.driver.click = self.touch
         self.driver.touch = self.touch
@@ -36,7 +43,7 @@ class AirAppium(AppiumLibrary):
         self.driver.swipe = self.air_swipe
         self.driver.get_current_resolution = self.get_current_resolution
         G.add_device(self.driver)
-        return app
+        return self._cache.register(application, alias)
 
     @allure.step
     def close_application(self):
@@ -182,6 +189,7 @@ class AirAppium(AppiumLibrary):
     def element_should_contain_text(self, locator, expected, message=''):
         return super(AirAppium, self).element_should_contain_text(locator=locator, expected=expected, message=message)
 
+    @allure.step
     def capture_page_screenshot(self, filename=None):
         file = super(AirAppium, self).capture_page_screenshot(filename=filename)
         with open(file, 'rb') as fp:
@@ -198,7 +206,8 @@ class AirAppium(AppiumLibrary):
             return
         self._running_on_failure_routine = True
         try:
-            self.capture_page_screenshot()
+            file = self.driver.get_screenshot_as_base64()
+            allure.attach(base64.b64decode(file), '异常截图', allure.attachment_type.PNG)
         except Exception as err:
             self._run_on_failure_error(err)
         finally:
@@ -290,18 +299,13 @@ class AirAppium(AppiumLibrary):
             raise Exception('Unsupport this keyword')
 
     def text(self, text, enter=True, **kwargs):
-        if self._is_ios() or self._is_android():
-            if enter:
-                text += '\n'
-            self.driver.send_keys(text)
-        else:
-            raise Exception('Unsupport this keyword')
+        raise Exception('Unsupport this keyword')
 
-    def keyevent(self, keyname, **kwargs):
+    def air_keyevent(self, keyname, **kwargs):
         if self._is_ios():
             return self.driver.press_button(keyname)
         elif self._is_android():
-            self.driver.keyevent(keyname)
+            self.shell("input keyevent {}".format(keyname.upper()))
         else:
             raise Exception('Unsupport this keyword')
 
