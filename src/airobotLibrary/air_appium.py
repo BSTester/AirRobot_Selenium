@@ -4,6 +4,8 @@ from airtest import aircv
 from airobots.core.api import G
 from appium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
+from appium.webdriver.common.touch_action import TouchAction
+from appium.webdriver.common.multi_action import MultiAction
 import allure
 import traceback
 import base64
@@ -40,6 +42,7 @@ class AirAppium(AppiumLibrary):
         self.driver.shell = self.shell
         self.driver.air_swipe = self.driver.swipe
         self.driver.pinch = self.air_pinch
+        self.driver.zoom = self.air_zoom
         self.driver.swipe = self.air_swipe
         self.driver.get_current_resolution = self.get_current_resolution
         G.add_device(self.driver)
@@ -140,6 +143,10 @@ class AirAppium(AppiumLibrary):
     @allure.step
     def pinch(self, locator, percent="200%", steps=1):
         return super(AirAppium, self).pinch(locator=locator, percent=percent, steps=steps)
+
+    @allure.step
+    def zoom(self, locator, percent="200%", steps=1):
+        return super(AirAppium, self).zoom(locator=locator, percent=percent, steps=steps)
 
     @allure.step
     def page_should_contain_text(self, text, loglevel='INFO'):
@@ -368,8 +375,45 @@ class AirAppium(AppiumLibrary):
         else:
             raise Exception('Unsupport this keyword')
 
-    def air_pinch(self, center=None, percent=0.5, duration=0.5, steps=1, in_or_out='in', element=None, **kwargs):
-        raise Exception('Unsupport this keyword')
+    def air_pinch(self, center=None, percent=0.5, duration=0.05, steps=1, in_or_out='in', element=None, **kwargs):
+        x, y = cx, cy = (0, 0)
+        if element:
+            element_location = element.location
+            x, y = element_location.get('x'), element_location.get('y')
+        if isinstance(center, (list, tuple)): cx, cy = center 
+        width, height = self.get_current_resolution()
+        if x == y == cx == cy == 0: x, y = width/2, height/2
+        elif cx and cy: x, y = cx, cy
+        p1x, p1y = width*0.2, height*0.2
+        p2x, p2y = width*0.8, height*0.8
+        p1 = TouchAction(self.driver)
+        p2 = TouchAction(self.driver)
+        if in_or_out == 'out':
+            p1.press(x=x, y=y).wait(500).move_to(x=p1x, y=p1y).wait(duration*1000).release()
+            p2.press(x=x, y=y).wait(500).move_to(x=p2x, y=p2y).wait(duration*1000).release()
+        else:
+            p1.press(x=p1x, y=p1y).wait(500).move_to(x=x, y=y).wait(duration*1000).release()
+            p2.press(x=p2x, y=p2y).wait(500).move_to(x=x, y=y).wait(duration*1000).release()
+        for _ in range(steps):
+            ma = MultiAction(self.driver)
+            ma.add(p1, p2)
+            ma.perform()
+
+    def air_zoom(self, element, percent="200%", steps=1):
+        element_location = element.location
+        x, y = element_location.get('x'), element_location.get('y')
+        width, height = self.get_current_resolution()
+        if x == y == 0: x, y = width/2, height/2
+        p1x, p1y = width*0.2, height*0.2
+        p2x, p2y = width*0.8, height*0.8
+        p1 = TouchAction(self.driver)
+        p2 = TouchAction(self.driver)
+        p1.press(x=x, y=y).wait(500).move_to(x=p1x, y=p1y).wait(50).release()
+        p2.press(x=x, y=y).wait(500).move_to(x=p2x, y=p2y).wait(50).release()
+        for _ in range(steps):
+            ma = MultiAction(self.driver)
+            ma.add(p1, p2)
+            ma.perform()
 
     def air_swipe(self, start_x=None, start_y=None, offset_x=None, offset_y=None, duration=0.1, **kwargs):
         if self._is_ios() or self._is_android():
