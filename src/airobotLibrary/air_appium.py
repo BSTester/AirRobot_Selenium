@@ -298,8 +298,14 @@ class AirAppium(AppiumLibrary):
         else:
             raise Exception('Unsupport this keyword')
 
-    def text(self, text, enter=True, **kwargs):
-        raise Exception('Unsupport this keyword')
+    def text(self, text, enter=True, locator=None, **kwargs):
+        if locator is not None:
+            if enter:
+                text += '\n'
+            element = self._element_find(locator, True, True)
+            ActionChains(self.driver).send_keys_to_element(element, text).perform()
+        else:
+            raise Exception('Unsupport this keyword')
 
     def air_keyevent(self, keyname, **kwargs):
         if self._is_ios():

@@ -14,7 +14,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 setup(
     name='AirobotLibrary',  # Required
 
-    version='1.1.9',  # Required
+    version='1.2.0',  # Required
 
     description='Robotframework Library For Airobot Test Framework',  # Optional
 
