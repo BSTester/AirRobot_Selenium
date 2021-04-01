@@ -22,13 +22,10 @@ from SeleniumLibrary.keywords import (AlertKeywords,
 from airtest import aircv
 from airtest_selenium.proxy import Element, WebChrome, WebFirefox, WebRemote, WebElement
 from airtest.core.helper import logwrap
-from airtest.core.settings import Settings as ST
+from airobots.core.settings import ST
 from airtest.core.cv import Template
 from airtest_selenium.utils.airtest_api import loop_find
 from typing import Optional, Union, Any
-
-if not hasattr(ST, 'REMOTE_URL'): ST.REMOTE_URL = None
-if not hasattr(ST, 'BROWSER'): ST.BROWSER = 'Chrome'
 
 class AirSelenium(
     AlertKeywords,

@@ -1,5 +1,5 @@
 from AppiumLibrary import AppiumLibrary
-from airtest.core.settings import Settings as ST
+from airobots.core.settings import ST
 from airtest import aircv
 from airobots.core.api import G
 from appium import webdriver
@@ -11,8 +11,6 @@ import traceback
 import base64
 import time
 
-
-if not hasattr(ST, 'REMOTE_URL'): ST.REMOTE_URL = None
 
 class AirAppium(AppiumLibrary):
     def __init__(self, timeout=5):
