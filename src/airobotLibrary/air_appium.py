@@ -17,7 +17,8 @@ class AirAppium(AppiumLibrary):
         super(AirAppium, self).__init__(timeout=timeout)
 
     @allure.step
-    def open_application(self, remote_url=ST.REMOTE_URL, alias=None, **kwargs):
+    def open_application(self, remote_url=ST.REMOTE_URL, alias=None, platformName=ST.PLATFORM_NAME, **kwargs):
+        kwargs['platformName'] = platformName
         desired_caps = kwargs
         application = webdriver.Remote(str(remote_url), desired_caps)
 
@@ -382,8 +383,8 @@ class AirAppium(AppiumLibrary):
         width, height = self.get_current_resolution()
         if x == y == cx == cy == 0: x, y = width/2, height/2
         elif cx and cy: x, y = cx, cy
-        p1x, p1y = width*0.2, height*0.2
-        p2x, p2y = width*0.8, height*0.8
+        p1x, p1y = width*0.2, y
+        p2x, p2y = width*0.8, y
         p1 = TouchAction(self.driver)
         p2 = TouchAction(self.driver)
         if in_or_out == 'out':
@@ -402,8 +403,8 @@ class AirAppium(AppiumLibrary):
         x, y = element_location.get('x'), element_location.get('y')
         width, height = self.get_current_resolution()
         if x == y == 0: x, y = width/2, height/2
-        p1x, p1y = width*0.2, height*0.2
-        p2x, p2y = width*0.8, height*0.8
+        p1x, p1y = width*0.2, y
+        p2x, p2y = width*0.8, y
         p1 = TouchAction(self.driver)
         p2 = TouchAction(self.driver)
         p1.press(x=x, y=y).wait(500).move_to(x=p1x, y=p1y).wait(50).release()
