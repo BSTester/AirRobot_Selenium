@@ -3,7 +3,6 @@ import sys
 import time
 import allure
 from selenium import webdriver
-from robotlibcore import PY2
 from robot.libraries.BuiltIn import RobotNotRunningError
 from SeleniumLibrary import SeleniumLibrary
 from SeleniumLibrary.keywords import (AlertKeywords,
@@ -575,4 +574,4 @@ class AirSelenium(
                 os.makedirs(self.screenshot_directory)
                 return os.path.abspath(self.screenshot_directory)
         except RobotNotRunningError:
-            return os.getcwd() if PY2 else os.getcwd()
+            return os.getcwd() 
